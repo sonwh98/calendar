@@ -6,9 +6,13 @@
   (- (:end evt)
      (:start evt)))
 
+(defn valid-event? [evt]
+  (-> evt duration pos?))
+
 (defn within?
   "read evt2 within evt1"
-  [evt1 evt2]
+  [evt1 evt2] {:pre [(and (valid-event? evt1)
+                          (valid-event? evt2))]}
   (let [start1 (:start evt1)
         end1 (:end evt1)
         
@@ -18,7 +22,8 @@
          (<= end2 end1))))
 
 
-(defn intersect? [evt1 evt2]
+(defn intersect? [evt1 evt2] {:pre [(and (valid-event? evt1)
+                                         (valid-event? evt2))]}
   (let [start1 (:start evt1)
         end1 (:end evt1)
         
@@ -32,17 +37,18 @@
          ))
   )
 
-(defn over-lapping? [evt1 evt2] {:pre [(and (-> evt1 duration pos?)
-                                            (-> evt2 duration pos?))]}
-  
+(defn over-lapping? [evt1 evt2] {:pre [(and (valid-event? evt1)
+                                            (valid-event? evt2))]}
   (within? evt1 evt2))
 
 (deftest overlap-test
   (testing "evt2 within evt1"
     (is (within?
          {:start 1 :end 5}
-         {:start 1 :end 6}))
-    
+         {:start 1 :end 3}))
+    (is (not (within?
+              {:start 1 :end 5}
+              {:start 4 :end 3})))
     )
   )
 
