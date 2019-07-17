@@ -30,15 +30,16 @@
 
 (defn report-overlapping [events]
   (let [sorted-events (sort-events events)]
-    (for [e1 sorted-events
-          :let [other (remove #(= % e1) sorted-events)
-                _ (prn "other = " other)
-                pairs (remove nil? (for [e2 (remove #(= % e1) sorted-events)]
-                                     (if (overlap? e1 e2)
-                                       #{e1 e2}
-                                       nil)))
-                _ (prn "pairs=" pairs)]]
-      pairs)))
+    (set (flatten (for [e1 sorted-events
+                        :let [other (remove #(= % e1) sorted-events)
+                              ;;_ (prn "other = " other)
+                              pairs (remove nil? (for [e2 (remove #(= % e1) sorted-events)]
+                                                   (if (overlap? e1 e2)
+                                                     #{e1 e2}
+                                                     nil)))
+                              ;;_ (prn "pairs=" pairs)
+                              ]]
+                    pairs)))))
 
 (deftest overlap-test
   (testing "no overlap"
@@ -77,11 +78,33 @@
   (testing "two overlapping event"
     (let [events [{:start 1 :end 10}
                   {:start 1 :end 3}
-                  {:start 4 :end 6}]]
-      (vec (set (flatten (report-overlapping events))))
-      )
+                  {:start 4 :end 6}]
+          pairs #{#{{:start 1 :end 10} {:start 1 :end 3}}
+                  #{{:start 1 :end 10} {:start 4 :end 6}}}]
+      (is (= pairs (report-overlapping events)))))
+
+  (testing "three overlapping event"
+    (let [events [{:start 1 :end 10}
+                  {:start 1 :end 3}
+                  {:start 4 :end 6}
+                  {:start 7 :end 9}]
+          pairs #{#{{:start 1 :end 10} {:start 1 :end 3}}
+                  #{{:start 1 :end 10} {:start 4 :end 6}}
+                  #{{:start 1 :end 10} {:start 7 :end 9}}}]
+      (is (= pairs (report-overlapping events))))
     )
-  )
+
+  (testing "multiple overlapping event"
+    (let [events [{:start 1 :end 10}
+                  {:start 1 :end 3}
+                  {:start 4 :end 6}
+                  {:start 2 :end 5}]
+          pairs #{#{{:start 1, :end 10} {:start 1, :end 3}}
+                  #{{:start 1, :end 3} {:start 2, :end 5}}
+                  #{{:start 4, :end 6} {:start 2, :end 5}}
+                  #{{:start 1, :end 10} {:start 2, :end 5}}
+                  #{{:start 1, :end 10} {:start 4, :end 6}}}]
+      (is (= pairs (report-overlapping events))))))
 
 (comment
   (clojure.test/run-tests)
