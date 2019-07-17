@@ -48,11 +48,18 @@
     (let [events [{:start 1 :end 10}
                   {:start 1 :end 3}
                   {:start 4 :end 6}
-                  {:start 7 :end 9}]
-          pairs #{#{{:start 1 :end 10} {:start 1 :end 3}}
-                  #{{:start 1 :end 10} {:start 4 :end 6}}
-                  #{{:start 1 :end 10} {:start 7 :end 9}}}]
-      (is (= pairs (calendar/report-overlapping events))))
+                  {:start 7 :end 9}
+                  {:start 2 :end 8}]
+          expected-pairs #{#{{:start 7, :end 9} {:start 2, :end 8}}
+                           #{{:start 1, :end 3} {:start 2, :end 8}}
+                           #{{:start 1, :end 10} {:start 1, :end 3}}
+                           #{{:start 1, :end 10} {:start 2, :end 8}}
+                           #{{:start 4, :end 6} {:start 2, :end 8}}
+                           #{{:start 1, :end 10} {:start 4, :end 6}}
+                           #{{:start 7, :end 9} {:start 1, :end 10}}}
+          report (calendar/report-overlapping events)]
+      (prn "report" report)
+      (is (= expected-pairs report)))
     )
 
   (testing "multiple overlapping event"
