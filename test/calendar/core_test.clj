@@ -1,6 +1,5 @@
 (ns calendar.core-test
-  (:require [clojure.test :refer :all]
-            [calendar.core :refer :all]))
+  (:require [clojure.test :refer :all]))
 
 (defn duration [evt]
   (- (:end evt)
@@ -15,8 +14,8 @@
              (:start evt2)))
         events))
 
-(defn over-lapping? [evt1 evt2] {:pre [(and (valid-event? evt1)
-                                            (valid-event? evt2))]}
+(defn overlap? [evt1 evt2] {:pre [(and (valid-event? evt1)
+                                       (valid-event? evt2))]}
   (let [[evt-a evt-b] (sort-events [evt1 evt2])
         start-a (:start evt-a)
         end-a  (:end evt-a)
@@ -26,40 +25,37 @@
     (<= start-b end-a)))
 
 (deftest overlap-test
-  (testing "evt2 within evt1"
-    (is (within?
-         {:start 1 :end 5}
-         {:start 1 :end 3}))
-    (is (not (within?
-              {:start 1 :end 5}
-              {:start 6 :end 10}))))
-
-  (testing "intersect?"
-    (is (not (intersect?
+  (testing "no overlap"
+    (is (not (overlap?
               {:start 1 :end 5}
               {:start 6 :end 10})))
-
-    (is (not (intersect?
+    (is (not (overlap?
               {:start 6 :end 10}
-              {:start 1 :end 5})))
+              {:start 1 :end 5}))))
 
-    (is (intersect?
+  (testing "overlap"
+    (is (overlap?
          {:start 1 :end 5}
          {:start 4 :end 6}))
 
-    (is (intersect?
+    (is (overlap?
          {:start 4 :end 6}
+         {:start 1 :end 5})))
+
+  (testing "overlap where one event is within the time of another"
+    (is (overlap?
+         {:start 2 :end 4}
          {:start 1 :end 5}))
 
-    (is (intersect?
-         {:start 6 :end 7}
-         {:start 1 :end 5}))
-    )
+    (is (overlap?
+         {:start 1 :end 5}
+         {:start 2 :end 4})))
   )
 
 
 (comment
   (clojure.test/run-tests)
-
   (sort-events [ {:start 1} {:start 10} {:start 5} {:start 0}])
+
+  
   )
