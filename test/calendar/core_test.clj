@@ -15,21 +15,8 @@
              (:start evt2)))
         events))
 
-(defn within?
-  "read evt2 within evt1"
-  [evt1 evt2] {:pre [(and (valid-event? evt1)
-                          (valid-event? evt2))]}
-  (let [start1 (:start evt1)
-        end1 (:end evt1)
-        
-        start2 (:start evt2)
-        end2 (:end evt2)]
-    (and (>= start2 start1)
-         (<= end2 end1))))
-
-
-(defn intersect? [evt1 evt2] {:pre [(and (valid-event? evt1)
-                                         (valid-event? evt2))]}
+(defn over-lapping? [evt1 evt2] {:pre [(and (valid-event? evt1)
+                                            (valid-event? evt2))]}
   (let [[evt-a evt-b] (sort-events [evt1 evt2])
         start-a (:start evt-a)
         end-a  (:end evt-a)
@@ -37,11 +24,6 @@
         start-b (:start evt-b)
         end-b (:end evt-b)]
     (<= start-b end-a)))
-
-(defn over-lapping? [evt1 evt2] {:pre [(and (valid-event? evt1)
-                                            (valid-event? evt2))]}
-  (within? evt1 evt2))
-
 
 (deftest overlap-test
   (testing "evt2 within evt1"
