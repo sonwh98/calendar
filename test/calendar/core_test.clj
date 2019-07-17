@@ -1,70 +1,31 @@
 (ns calendar.core-test
-  (:require [clojure.test :refer :all]))
-
-(defn duration [evt]
-  (- (:end evt)
-     (:start evt)))
-
-(defn valid-event?
-  "a valid event must have a positive duration"
-  [evt]
-  (-> evt duration pos?))
-
-(defn sort-events
-  "sort events in ascending order"
-  [events]
-  (sort (fn [evt1 evt2]
-          (- (:start evt1)
-             (:start evt2)))
-        events))
-
-(defn overlap? [evt1 evt2] {:pre [(and (valid-event? evt1)
-                                       (valid-event? evt2))]}
-  (let [[evt-a evt-b] (sort-events [evt1 evt2])
-        start-a (:start evt-a)
-        end-a  (:end evt-a)
-
-        start-b (:start evt-b)
-        end-b (:end evt-b)]
-    (<= start-b end-a)))
-
-(defn report-overlapping [events]
-  (let [sorted-events (sort-events events)]
-    (set (flatten (for [e1 sorted-events
-                        :let [other (remove #(= % e1) sorted-events)
-                              ;;_ (prn "other = " other)
-                              pairs (remove nil? (for [e2 (remove #(= % e1) sorted-events)]
-                                                   (if (overlap? e1 e2)
-                                                     #{e1 e2}
-                                                     nil)))
-                              ;;_ (prn "pairs=" pairs)
-                              ]]
-                    pairs)))))
+  (:require [clojure.test :refer :all]
+            [calendar.core :as calendar]))
 
 (deftest overlap-test
   (testing "no overlap"
-    (is (not (overlap?
+    (is (not (calendar/overlap?
               {:start 1 :end 5}
               {:start 6 :end 10})))
-    (is (not (overlap?
+    (is (not (calendar/overlap?
               {:start 6 :end 10}
               {:start 1 :end 5}))))
 
   (testing "overlap"
-    (is (overlap?
+    (is (calendar/overlap?
          {:start 1 :end 5}
          {:start 4 :end 6}))
 
-    (is (overlap?
+    (is (calendar/overlap?
          {:start 4 :end 6}
          {:start 1 :end 5})))
 
   (testing "overlap where one event is within the time of another"
-    (is (overlap?
+    (is (calendar/overlap?
          {:start 2 :end 4}
          {:start 1 :end 5}))
 
-    (is (overlap?
+    (is (calendar/overlap?
          {:start 1 :end 5}
          {:start 2 :end 4}))))
 
@@ -73,7 +34,7 @@
     (let [events [{:start 1 :end 3}
                   {:start 4 :end 6}
                   {:start 7 :end 10}]]
-      (is (empty? (report-overlapping events)))))
+      (is (empty? (calendar/report-overlapping events)))))
 
   (testing "two overlapping event"
     (let [events [{:start 1 :end 10}
@@ -81,7 +42,7 @@
                   {:start 4 :end 6}]
           pairs #{#{{:start 1 :end 10} {:start 1 :end 3}}
                   #{{:start 1 :end 10} {:start 4 :end 6}}}]
-      (is (= pairs (report-overlapping events)))))
+      (is (= pairs (calendar/report-overlapping events)))))
 
   (testing "three overlapping event"
     (let [events [{:start 1 :end 10}
@@ -91,7 +52,7 @@
           pairs #{#{{:start 1 :end 10} {:start 1 :end 3}}
                   #{{:start 1 :end 10} {:start 4 :end 6}}
                   #{{:start 1 :end 10} {:start 7 :end 9}}}]
-      (is (= pairs (report-overlapping events))))
+      (is (= pairs (calendar/report-overlapping events))))
     )
 
   (testing "multiple overlapping event"
@@ -104,7 +65,7 @@
                   #{{:start 4, :end 6} {:start 2, :end 5}}
                   #{{:start 1, :end 10} {:start 2, :end 5}}
                   #{{:start 1, :end 10} {:start 4, :end 6}}}]
-      (is (= pairs (report-overlapping events))))))
+      (is (= pairs (calendar/report-overlapping events))))))
 
 (comment
   (clojure.test/run-tests)
