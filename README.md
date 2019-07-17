@@ -1,4 +1,4 @@
-# calendar
+# Calendar
 
 Code to generate overlapping events. An event a map with two keys :start and :end
 Assumptions: start and end time are inclusive therefore 
