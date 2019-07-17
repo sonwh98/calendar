@@ -28,7 +28,7 @@
         end-b (:end evt-b)]
     (<= start-b end-a)))
 
-(defn report-overlapping [events]
+(defn generate-overlapping [events]
   (let [sorted-events (sort-events events)]
     (set (flatten (for [e1 sorted-events
                         :let [other (remove #(= % e1) sorted-events)
